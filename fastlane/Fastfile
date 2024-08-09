@@ -1,0 +1,41 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:web)
+
+platform :web do
+  before_all do
+    # Load environment variables from .env file
+    dotenv = File.join(File.dirname(__FILE__), '..', '.env')
+    if File.exist?(dotenv)
+      require 'dotenv'
+      Dotenv.load(dotenv)
+    end
+  end
+
+  desc "Deploy to Netlify"
+  lane :deploy do
+    # 환경 변수 설정
+    netlify_auth_token = ENV['NETLIFY_AUTH_TOKEN']
+    netlify_site_id = ENV['NETLIFY_SITE_ID']
+
+    # 프로젝트 빌드
+    sh "npm install"
+    sh "npm run build"
+
+    # Netlify에 배포
+    sh "netlify deploy --prod --dir=../build --site=#{netlify_site_id} --auth=#{netlify_auth_token}"
+  end
+end
